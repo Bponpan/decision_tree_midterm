@@ -1,0 +1,63 @@
+from sklearn.preprocessing import LabelEncoder
+from sklearn.tree import  plot_tree, DecisionTreeClassifier
+from sklearn.model_selection import train_test_split, GridSearchCV,\
+RandomizedSearchCV
+from sklearn.ensemble import RandomForestClassifier
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+file_path = 'D:/ai/'
+file_name = 'car_data.csv'
+
+df = pd.read_csv(file_path + file_name)
+
+#preprocess
+df.dropna(inplace=True)
+# encoder = LabelEncoder()
+
+# df = df.apply(encoder.fit_transform)
+
+#train test split
+df.drop(columns=['User ID'],inplace=True )
+encoders = []
+for i in range(0, len(df.columns)-1):
+    enc = LabelEncoder()
+    df.iloc[:,i] = enc.fit_transform(df.iloc[:,i])
+    encoders.append(enc)
+
+x = df.iloc[:,0:3]
+y = df['Purchased']
+
+model = DecisionTreeClassifier(criterion='entropy')
+model.fit(x, y)
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=0)
+
+
+#plot tree
+feature = x.columns.tolist()
+Data_class = y.tolist()
+
+plt.figure(figsize=(25,20))
+_ = plot_tree(model, 
+              feature_names= feature, 
+              class_names = Data_class, 
+              label = 'all', 
+              impurity = True, 
+              precision = 3, 
+              filled = True, 
+              rounded = True,
+              fontsize = 16)
+
+plt.show()
+
+#feature importance
+feature_importance = model.feature_importances_
+feature_names = ['Gender','Age','AnnualSalary']
+
+sns.set(rc={'figure.figsize':(11.7,8.27)})
+sns.barplot(x = feature_importance, y = feature_names)
+print(feature_importance)
